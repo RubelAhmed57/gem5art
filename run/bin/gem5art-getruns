@@ -35,6 +35,7 @@ This file simply wraps the getRuns function from gem5art.run.
 
 from argparse import ArgumentParser
 from json import dump
+from gem5art.run import getRunsByNameLike, getRuns
 from uuid import UUID
 
 from gem5art.run import getRuns
@@ -49,6 +50,8 @@ def parseArgs():
                 help="Only output FS runs")
     parser.add_argument('--limit', type=int, default = 0,
                 help="Limit of the number of runs to return. Default: all")
+    parser.add_argument('-s', '--search_name', help="Query for the name field",
+                        default='')
 
     return parser.parse_args()
 
@@ -57,7 +60,11 @@ if __name__ == "__main__":
     args = parseArgs()
 
     with open(args.filename, 'w') as f:
-        runs = getRuns(args.fs_only, args.limit)
+        if args.search_name:
+            runs = getRunsByNameLike(args.search_name, args.fs_only,
+                                     args.limit)
+        else:
+            runs = getRuns(args.fs_only, args.limit)
 
         to_dump = [run._convertForJson(run._getSerializable()) for run in runs]
         dump(to_dump, f, indent=2)
